@@ -22,6 +22,7 @@ exports.getTeam = function(req, res) {
 
 exports.createTeam = function(req, res) {
 	team = req.body;
+	console.log(team);
 	MongoClient.connect('mongodb://localhost:27017/claims_management', function (err, db) {
 			if (err) {
 				console.log(err);

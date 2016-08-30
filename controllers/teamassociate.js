@@ -33,7 +33,6 @@ exports.addMemberInGroup = function(req, res) {
 	}
 	MongoClient.connect('mongodb://localhost:27017/claims_management', function (err, db) {
 			if (err) {
-				console.log(err);
 				res.send({'error':'An error has occurred'});
 			}
 			collection = db.collection('teams');
@@ -41,51 +40,58 @@ exports.addMemberInGroup = function(req, res) {
 				console.log(item);
 				if(item===null) {
 					res.status(500).send({'error':'Team Not found'});
+					db.close();
 					return;
 				}
-			});
-			collection = db.collection('members');
-			collection.findOne({'_id':new objectId(memberDetail.id)}, function(err, item) {
-				if(err) {
-					res.send({'error':'An error has occurred in member id.'});
-				}
-				console.log(item);
-				if(item == null) {
-					res.status(500).send({'error':'Menmber Not found'});
-					return;
-				}
-			});
-			collection = db.collection('team_associates');
-			collection.findOne({'name':teamName}, function(err, item) {
-				console.log(item);
-				if(item===null) {
-					collection.insert(team, {safe:true}, function(err, result) {
-						db.close();
-						console.log(result);
-						if (err) {
-							res.status(500).send({'error':'Duplicate Team name'});
-						} else {
-							response = createTeamResultParsing(result);
-							res.status(201).json(response);
+				else {
+					collection = db.collection('members');
+					collection.findOne({'_id':new objectId(memberDetail.id)}, function(err, item) {
+						if(err) {
+							res.send({'error':'An error has occurred in member id.'});
+						}
+						if(item == null) {
+							res.status(500).send({'error':'Menmber Not found'});
+							return;
+						}
+						else {
+							collection = db.collection('team_associates');
+							collection.findOne({'name':teamName}, function(err, item) {
+								console.log(item);
+								if(item===null) {
+									var member = new Array();
+									member.push(memberDetail);
+									var memberAdd = {};
+									memberAdd.name = teamName;
+									memberAdd.members = member;
+									console.log(test);
+									collection.insert(member, {safe:true}, function(err, result) {
+										db.close();
+										console.log(result);
+										if (err) {
+											res.status(500).send({'error':'Duplicate Team name'});
+										} else {
+											res.status(200).send({'error':'add associates...'});
+											db.close();
+										}
+									});
+								}
+								else {
+									collection.update(team, {safe:true}, function(err, result) {
+										db.close();
+										console.log(result);
+										if (err) {
+											res.status(500).send({'error':'Duplicate Team name'});
+										} else {
+											response = createTeamResultParsing(result);
+											res.status(201).json(response);
+										}
+									});
+								}
+							});
 						}
 					});
 				}
-				else {
-					
-				}
 			});
-			res.status(200).json({'error':'Both found'})
-			/*res.status(500).send({'error':'Member and team found'});*/
-			/*collection.insert(team, {safe:true}, function(err, result) {
-				db.close();
-				console.log(result);
-				if (err) {
-					res.status(500).send({'error':'Duplicate Team name'});
-				} else {
-					response = createTeamResultParsing(result);
-					res.status(201).json(response);
-				}
-			});*/
 	});
 };
 
