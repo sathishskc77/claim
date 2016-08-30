@@ -2,25 +2,6 @@ var mongo = require('mongodb');
 var MongoClient = require('mongodb').MongoClient;
 var objectId = mongo.ObjectID;
 
-exports.getMembersOfGroup = function(req, res) {
-	MongoClient.connect('mongodb://localhost:27017/claims_management', function (err, db) {
-		var name = req.params.name;
-		//var db = dbCon.dbConnect();
-		console.log('Retrieving team: ' + name);
-		collection = db.collection('member_associations');
-		collection.findOne({'name':name}, function(err, item) {
-			console.log(err);
-			db.close();
-			if(item) {
-				response = getTeamResultParsing(item);
-				res.status(200).json(response);
-			}
-			else {
-				res.status(500).send({'error':'Team Not found'});
-			}
-		});
-	});
-};
 
 exports.addMemberInGroup = function(req, res) {
 	var memberDetail = req.body;
@@ -31,7 +12,7 @@ exports.addMemberInGroup = function(req, res) {
 		res.status(500).send({'error':'Invalid member id...'});
 		return;
 	}
-	MongoClient.connect('mongodb://localhost:27017/claims_management', function (err, db) {
+	MongoClient.connect(process.env.MONGO_CONNECTION_URL, function (err, db) {
 			if (err) {
 				res.send({'error':'An error has occurred'});
 			}
@@ -92,21 +73,5 @@ exports.addMemberInGroup = function(req, res) {
 					});
 				}
 			});
-	});
-};
-
-exports.deleteMemberInGroup = function(req, res) {
-    var name = req.params.name;
-	console.log('Deleting team: ' + name);
-	MongoClient.connect('mongodb://localhost:27017/claims_management', function (err, db) {
-		collection = db.collection('member_associations');
-        collection.remove({'name':name}, {safe:true}, function(err, result) {
-			db.close();
-            if (err) {
-                res.send({'error':'An error has occurred - ' + err});
-            } else {
-				res.status(204).send();
-            }
-        });
 	});
 };

@@ -4,7 +4,7 @@ var objectId = mongo.ObjectID;
 
 exports.createMember = function(req, res) {
 	var member = req.body;
-		MongoClient.connect('mongodb://localhost:27017/claims_management', function (err, db) {
+		MongoClient.connect(process.env.MONGO_CONNECTION_URL, function (err, db) {
 			if (err) {
 				console.log(err);
 				res.send({'error':'An error has occurred'});
@@ -23,9 +23,8 @@ exports.createMember = function(req, res) {
 
 exports.deleteMember = function(req, res) {
     var id = req.params.id;
-	//var db = dbCon.dbConnect();
     console.log('Deleting member with id: ' + id);
-	MongoClient.connect('mongodb://localhost:27017/claims_management', function (err, db) {
+	MongoClient.connect(process.env.MONGO_CONNECTION_URL, function (err, db) {
 		collection = db.collection('members');
         collection.remove({'_id':new objectId(id)}, {safe:true}, function(err, result) {
             if (err) {
@@ -39,9 +38,8 @@ exports.deleteMember = function(req, res) {
 
 exports.getMember = function(req, res) {
     var id = req.params.id;
-	//var db = dbCon.dbConnect();
     console.log('Retrieving member with id: ' + id);
-	MongoClient.connect('mongodb://localhost:27017/claims_management', function (err, db) {
+	MongoClient.connect(process.env.MONGO_CONNECTION_URL, function (err, db) {
 		if(err){
 			res.status(500).send({'error':'Member Not found'});
 		}

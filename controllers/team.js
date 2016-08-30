@@ -1,13 +1,11 @@
 var MongoClient = require('mongodb').MongoClient;
 
 exports.getTeam = function(req, res) {
-	MongoClient.connect('mongodb://localhost:27017/claims_management', function (err, db) {
+	MongoClient.connect(process.env.MONGO_CONNECTION_URL, function (err, db) {
 		var name = req.params.name;
-		//var db = dbCon.dbConnect();
 		console.log('Retrieving team: ' + name);
 		collection = db.collection('teams');
 			collection.findOne({'name':name}, function(err, item) {
-				console.log(err);
 				db.close();
 				if(item) {
 					response = getTeamResultParsing(item);
@@ -23,7 +21,7 @@ exports.getTeam = function(req, res) {
 exports.createTeam = function(req, res) {
 	team = req.body;
 	console.log(team);
-	MongoClient.connect('mongodb://localhost:27017/claims_management', function (err, db) {
+	MongoClient.connect(process.env.MONGO_CONNECTION_URL, function (err, db) {
 			if (err) {
 				console.log(err);
 				res.send({'error':'An error has occurred'});
@@ -45,7 +43,7 @@ exports.createTeam = function(req, res) {
 exports.deleteTeam = function(req, res) {
     var name = req.params.name;
 	console.log('Deleting team: ' + name);
-	MongoClient.connect('mongodb://localhost:27017/claims_management', function (err, db) {
+	MongoClient.connect(process.env.MONGO_CONNECTION_URL, function (err, db) {
 		collection = db.collection('teams');
         collection.remove({'name':name}, {safe:true}, function(err, result) {
 			db.close();
